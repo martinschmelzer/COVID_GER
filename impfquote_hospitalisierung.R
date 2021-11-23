@@ -41,7 +41,8 @@ ggplot(df) +
   ylab("7-Tage Hospitalisierung Inzidenz") +
   xlab("") +
   ggtitle("Inzidenz der 7-Tage Hospitalisierung nach Bundesland und Altersgruppe", subtitle = "Impfquoten vom 22.11.2021, Quelle: RKI") +
-  theme(text = element_text(size = 11))
+  theme(text = element_text(size = 11),
+        strip.text.y = element_text(angle = 0))
 dev.off()
 
 
