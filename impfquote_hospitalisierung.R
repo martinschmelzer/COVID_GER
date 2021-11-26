@@ -33,14 +33,15 @@ df$Bundesland <- as.factor(df$Bundesland)
 df$Bundesland <- reorder(df$Bundesland, -df$Impfquote_gesamt_voll)
 
 # Plot
-pdf("impfquote_hospitalisierung.pdf", width = 10, height = 14)
+pdf(paste0(format(lubridate::now(), "%Y%m%d"),"_impfquote_hospitalisierung.pdf"), width = 10, height = 14)
 ggplot(df) +
   geom_line(aes(x = Datum, y = `7T_Hospitalisierung_Inzidenz`, col = Impfquote_gesamt_voll)) +
-  scale_color_gradient(low = "red", high = "green", "Quote der voll-\nständigen Impfungen (%)", breaks = seq(min(df$Impfquote_gesamt_voll), max(df$Impfquote_gesamt_voll), length.out = 3)) +
+  scale_color_gradient(low = "red", high = "green", "Vollständig Geimpfte (%)", breaks = seq(min(df$Impfquote_gesamt_voll), max(df$Impfquote_gesamt_voll), length.out = 3)) +
+  scale_x_date(breaks = "1 month", date_labels = "%d. %b") +
   facet_grid(rows = vars(Bundesland), cols = vars(Altersgruppe)) +
   ylab("7-Tage-Hospitalisierungsinzidenz") +
   xlab("") +
-  ggtitle("7-Tage-Hospitalisierungsinzidenz nach Bundesland und Altersgruppe", subtitle = "Impfquoten vom 01.10.2021, Quelle: RKI") +
+  ggtitle("7-Tage-Hospitalisierungsinzidenz nach Bundesland und Altersgruppe", subtitle = "Impfquoten vom 16.09.2021, Quelle: RKI") +
   theme(text = element_text(size = 11),
         strip.text.y = element_text(angle = 0))
 dev.off()
