@@ -7,7 +7,7 @@ bundeslaender <- c("Schleswig-Holstein" = 1, "Hamburg" = 2, "Niedersachsen" = 3,
                    "Rheinland-Pfalz" = 7, "Baden-Württemberg" = 8, "Bayern" = 9,
                    "Saarland" = 10, "Berlin" = 11, "Brandenburg" = 12,
                    "Mecklenburg-Vorpommern" = 13, "Sachsen" = 14, 
-                   "Sachsen-Anahalt" = 15, "Thüringen" = 16)
+                   "Sachsen-Anhalt" = 15, "Thüringen" = 16)
 
 abbreviate_bl <- function(x) {
   case_when(x == "Nordrhein-Westfalen" ~ "NW",
@@ -44,21 +44,21 @@ quoten <- quoten %>%
 # Inzidenzen (große Datei)
 inz <- fread("https://github.com/robert-koch-institut/SARS-CoV-2_Infektionen_in_Deutschland/blob/master/Aktuell_Deutschland_SarsCov2_Infektionen.csv?raw=true", encoding = "UTF-8")
 df_inz <- inz %>% 
-  mutate(Bundesland = parse_integer(substr(IdLandkreis, 1, ifelse(IdLandkreis >= 10000, 2, 1)))) %>%
-  mutate(Bundesland = names(bundeslaender)[Bundesland]) %>%
-  arrange(Meldedatum) %>%
-  group_by(Meldedatum, Bundesland) %>% 
+  mutate(Bundesland = parse_integer(substr(IdLandkreis, 1, ifelse(IdLandkreis >= 10000, 2, 1)))) %>%  # BL ermitteln
+  mutate(Bundesland = names(bundeslaender)[Bundesland]) %>%  # BL Klarnamen
+  arrange(Meldedatum) %>%  # Nach Meldedatum aufsteigend sortieren
+  group_by(Meldedatum, Bundesland) %>%
   filter(NeuerFall != -1) %>%
-  summarise(Sum_AnzahlFall = sum(AnzahlFall)) %>%
+  summarise(Sum_AnzahlFall = sum(AnzahlFall)) %>%  # Fälle pro Tag
   group_by(Bundesland) %>%
-  mutate(Faelle7Tage = roll_sum(Sum_AnzahlFall, n = 7, align = "right", fill = NA, na.rm = T)) %>%
-  merge(x = ., y = quoten, by = "Bundesland") %>%
-  merge(x = ., y = bev, by = "Bundesland") %>%
+  mutate(Faelle7Tage = roll_sum(Sum_AnzahlFall, n = 7, align = "right", fill = NA, na.rm = T)) %>%  # Fälle der jeweils letzten 7 Tage
+  merge(x = ., y = quoten, by = "Bundesland") %>%  # Impfquoten mergen
+  merge(x = ., y = bev, by = "Bundesland") %>%  # Gesamtbevölkerungszahl mergen
   mutate(Faelle7Tage_p100T = Faelle7Tage/Gesamtbevölkerung*100000) %>%
   filter(Meldedatum >= lubridate::ymd("20210901")) %>%
   mutate(Bundesland = abbreviate_bl(Bundesland))
   
-# Bundesland als Faktor
+# Bundesland zu Faktor konvertieren und für den Plot nach Impfquote sortieren
 df_inz$Bundesland <- as.factor(df_inz$Bundesland)
 df_inz$Bundesland <- reorder(df_inz$Bundesland, -df_inz$Impfquote_gesamt_voll)
   
@@ -81,11 +81,13 @@ dev.off()
 # Hospitalisierungsraten (ausgewählte Altersgruppen)
 hosp <- fread("https://raw.githubusercontent.com/robert-koch-institut/COVID-19-Hospitalisierungen_in_Deutschland/master/Aktuell_Deutschland_COVID-19-Hospitalisierungen.csv", encoding = "UTF-8")
 df_hosp <- hosp %>%
-  filter(Bundesland != "Bundesgebiet", Altersgruppe %in% c("15-34", "35-59", "60-79", "80+"), Datum >= lubridate::ymd("20210916")) %>%
+  filter(Bundesland != "Bundesgebiet", 
+         Altersgruppe %in% c("15-34", "35-59", "60-79", "80+"), 
+         Datum >= lubridate::ymd("20210916")) %>%
   merge(x = ., y = quoten, by = "Bundesland") %>%
   mutate(Bundesland = abbreviate_bl(Bundesland))
 
-# Bundesland als Faktor
+# Bundesland zu Faktor konvertieren und für Plot sortieren
 df_hosp$Bundesland <- as.factor(df_hosp$Bundesland)
 df_hosp$Bundesland <- reorder(df_hosp$Bundesland, -df_hosp$Impfquote_gesamt_voll)
 
