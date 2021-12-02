@@ -100,7 +100,7 @@ ggplot(df_hosp) +
   facet_grid(rows = vars(Bundesland), cols = vars(Altersgruppe)) +
   ylab("7-Tage-Hospitalisierungsinzidenz") +
   xlab("Datum") +
-  ggtitle("7-Tage-Hospitalisierungsinzidenz nach Bundesland und Altersgruppe", subtitle = paste0("Stand: ",format(lubridate::now(), "%d.%m.%Y"), ", Impfquoten vom 16.09.2021, Daten: RKI")) +
+  ggtitle("7-Tage-Hospitalisierungsinzidenz nach Bundesland und Altersgruppe", subtitle = paste0("Stand: ", format(lubridate::now(), "%d.%m.%Y"), ", Impfquoten vom 16.09.2021, Daten: RKI")) +
   theme(text = element_text(size = 11),
         strip.text.y = element_text(angle = 0))
 dev.off()
