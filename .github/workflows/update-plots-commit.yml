@@ -7,9 +7,8 @@ jobs:
   update_plots:
     runs-on: macos-latest
     steps:
-      - name: Setup
-        uses: actions/checkout@master
-        uses: r-lib/actions/setup-r@master
+      - uses: actions/checkout@master
+      - uses: r-lib/actions/setup-r@master
         with:
           r-version: 'release'
         
@@ -19,10 +18,12 @@ jobs:
           R -e 'install.packages("tidyverse", dependencies = TRUE)'
           R -e 'install.packages("data.table", dependencies = TRUE)'
           R -e 'install.packages("remotes", dependencies = TRUE)'
-          
+        shell: Rscript {0}
+        
       - name: Run script
         run: | 
-          RScript impfquote_hospitatlisierung.R
+          impfquote_hospitatlisierung.R
+        shell: Rscript {0}
         
       - name: Commit files
         run: |
