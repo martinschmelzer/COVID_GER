@@ -12,6 +12,13 @@ jobs:
         with:
           r-version: 'release'
         
+      - name: Cache R packages
+        uses: actions/cache@v1
+        with:
+          path: ${{ env.R_LIBS_USER }}
+          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
+          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
+          
       - name: Install packages
         run: |
           install.packages("RcppRoll", dependencies = TRUE)
