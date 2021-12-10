@@ -1,58 +1,25 @@
+name: update_plots
+
 on:
   schedule:
-    - cron: "11 16 * * *"
+    - cron: "11 9 * * *"
 jobs:
   generate-data:
-    runs-on: ${{ matrix.config.os }}
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
-    
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-          - {os: ubuntu-latest, r: 'release'}
-          
-    env:
-      R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
-      RSPM: ${{ matrix.config.rspm }}
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-    
+    runs-on: macos-latest
+
     steps:
-      - uses: actions/checkout@v2
-
+      - uses: actions/checkout@master
       - uses: r-lib/actions/setup-r@master
-        with:
-          r-version: ${{ matrix.config.r }}
-          http-user-agent: ${{ matrix.config.http-user-agent }}
-
-      - uses: r-lib/actions/setup-pandoc@master
-
-      - name: Query dependencies
-        run: |
-          install.packages('RcppRoll')
-          install.packages('tidyverse')
-          install.packages('data.table')
-          install.packages('remotes')
-          saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
-          writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
-        shell: Rscript {0}
-
-      - name: Cache R packages
-        uses: actions/cache@v1
-        with:
-          path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
-          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
-
-      - name: Install dependencies
-        run: |
-          remotes::install_deps(dependencies = TRUE)
-        shell: Rscript {0}
         
-      - name: Generate data
+      - name: Install packages
         run: |
-          source("impfquote_hospitalisierung.R")
-        shell: Rscript {0} 
+          R -e 'install.packages("RcppRoll", dependencies = TRUE)'
+          R -e 'install.packages("tidyverse", dependencies = TRUE)'
+          R -e 'install.packages("data.table", dependencies = TRUE)'
+          R -e 'install.packages("remotes", dependencies = TRUE)'
+          
+      - name: Run script
+        run: | RScript impfquote_hospitatlisierung.R
         
       - name: Commit files
         run: |
@@ -61,3 +28,6 @@ jobs:
           git add --all
           git commit -am "add data"
           git push 
+        env: 
+          REPO_KEY: ${{secrets.GITHUB_TOKEN}}
+          username: gitub-actions
