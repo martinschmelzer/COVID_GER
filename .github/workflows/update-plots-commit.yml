@@ -5,7 +5,7 @@ on: push
     # - cron: "15 10 * * *"
 jobs:
   update_plots:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@master
       - uses: r-lib/actions/setup-r@master

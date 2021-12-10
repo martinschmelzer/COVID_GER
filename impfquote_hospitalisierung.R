@@ -1,5 +1,6 @@
 require(data.table)
-require(tidyverse)
+require(dplyr)
+require(ggplot2)
 require(RcppRoll)
 
 bundeslaender <- c("Schleswig-Holstein" = 1, "Hamburg" = 2, "Niedersachsen" = 3,
