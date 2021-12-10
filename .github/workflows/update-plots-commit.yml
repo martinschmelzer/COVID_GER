@@ -1,8 +1,8 @@
 name: update_plots
 
-on: push
-  # schedule:
-    # - cron: "0 8 * * *"
+on:
+  schedule:
+   - cron: "0 8 * * *"
 jobs:
   update_plots:
     runs-on: macos-latest
