@@ -14,10 +14,10 @@ jobs:
         
       - name: Install packages
         run: |
-          R -e 'install.packages("RcppRoll", dependencies = TRUE)'
-          R -e 'install.packages("tidyverse", dependencies = TRUE)'
-          R -e 'install.packages("data.table", dependencies = TRUE)'
-          R -e 'install.packages("remotes", dependencies = TRUE)'
+          install.packages("RcppRoll", dependencies = TRUE)
+          install.packages("tidyverse", dependencies = TRUE)
+          install.packages("data.table", dependencies = TRUE)
+          install.packages("remotes", dependencies = TRUE)
         shell: Rscript {0}
         
       - name: Run script
