@@ -2,14 +2,16 @@ name: update_plots
 
 on:
   schedule:
-    - cron: "28 9 * * *"
+    - cron: "0 10 * * *"
 jobs:
-  step1:
+  update_plots:
     runs-on: macos-latest
-
     steps:
-      - uses: actions/checkout@master
-      - uses: r-lib/actions/setup-r@master
+      - name: Setup
+        uses: actions/checkout@master
+        uses: r-lib/actions/setup-r@master
+          with:
+            r-version: 'release'
         
       - name: Install packages
         run: |
