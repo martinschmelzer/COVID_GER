@@ -17,6 +17,7 @@ jobs:
           install.packages("RcppRoll", dependencies = TRUE)
           install.packages("dplyr", dependencies = TRUE)
           install.packages("lubridate", dependencies = TRUE)
+          install.packages("readr", dependencies = TRUE)
           install.packages("ggplot2", dependencies = TRUE)
           install.packages("data.table", dependencies = TRUE)
           install.packages("remotes", dependencies = TRUE)
