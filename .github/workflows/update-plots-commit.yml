@@ -2,9 +2,9 @@ name: update_plots
 
 on:
   schedule:
-    - cron: "11 9 * * *"
+    - cron: "28 9 * * *"
 jobs:
-  generate-data:
+  step1:
     runs-on: macos-latest
 
     steps:
@@ -19,7 +19,8 @@ jobs:
           R -e 'install.packages("remotes", dependencies = TRUE)'
           
       - name: Run script
-        run: | RScript impfquote_hospitatlisierung.R
+        run: | 
+          RScript impfquote_hospitatlisierung.R
         
       - name: Commit files
         run: |
