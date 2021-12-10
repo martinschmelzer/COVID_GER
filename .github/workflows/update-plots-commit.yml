@@ -10,8 +10,8 @@ jobs:
       - name: Setup
         uses: actions/checkout@master
         uses: r-lib/actions/setup-r@master
-          with:
-            r-version: 'release'
+        with:
+          r-version: 'release'
         
       - name: Install packages
         run: |
