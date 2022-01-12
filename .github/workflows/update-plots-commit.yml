@@ -44,7 +44,6 @@ jobs:
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          git fetch
           git add --all
           git commit -am "add data"
           git push 
