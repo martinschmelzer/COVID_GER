@@ -37,7 +37,7 @@ bev <- bev %>%
 
 
 # Impfquoten vom 16.09.2021, vor der 4. Welle und erstes Bereitstellungsdatum
-quoten <- fread("https://github.com/robert-koch-institut/COVID-19-Impfungen_in_Deutschland/raw/master/Archiv/2021-09-17_Deutschland_Impfquoten_COVID-19.csv", encoding = "UTF-8")
+quoten <- fread("https://github.com/robert-koch-institut/COVID-19-Impfungen_in_Deutschland/raw/master/Archiv/2021-12-31_Deutschland_Impfquoten_COVID-19.csv?raw=true", encoding = "UTF-8")
 quoten <- quoten %>%
   filter(Bundesland != "Bundesressorts", Bundesland != "Deutschland") %>%
   select(-Datum, BundeslandId_Impfort)
@@ -57,7 +57,7 @@ df_inz <- inz %>%
   merge(x = ., y = quoten, by = "Bundesland") %>%  # Impfquoten mergen
   merge(x = ., y = bev, by = "Bundesland") %>%  # Gesamtbevölkerungszahl mergen
   mutate(Faelle7Tage_p100T = Faelle7Tage/Gesamtbevölkerung*100000) %>%
-  filter(Meldedatum >= lubridate::ymd("20210901")) %>%
+  filter(Meldedatum >= lubridate::ymd("20211001")) %>%
   mutate(Bundesland = abbreviate_bl(Bundesland))
   
 # Bundesland zu Faktor konvertieren und für den Plot nach Impfquote sortieren
@@ -72,10 +72,28 @@ gg1 <- ggplot(df_inz) +
   facet_grid(rows = vars(Bundesland)) +
   ylab("7-Tage-Inzidenz") +
   xlab("Datum") +
-  ggtitle("7-Tage-Inzidenz nach Bundesland", subtitle = paste0("Stand: ",format(lubridate::now(), "%d.%m.%Y"), ", Impfquoten vom 16.09.2021, Daten: RKI")) +
+  ggtitle("7-Tage-Inzidenz nach Bundesland", subtitle = paste0("Stand: ",format(lubridate::now(), "%d.%m.%Y"), ", Impfquoten vom 31.12.2021, Daten: RKI")) +
   theme(text = element_text(size = 11),
         strip.text.y = element_text(angle = 0))
-ggsave(filename = "impfquote_inzidenz.pdf", width = unit(6, "in"), height = unit(14, "in"), device = "pdf",)
+ggsave(filename = "impfquote_voll_inzidenz.pdf", width = unit(6, "in"), height = unit(14, "in"), device = "pdf",)
+
+
+# Bundesland zu Faktor konvertieren und für den Plot nach Impfquote sortieren
+df_inz$Bundesland <- as.factor(df_inz$Bundesland)
+df_inz$Bundesland <- reorder(df_inz$Bundesland, -df_inz$Impfquote_gesamt_boost)
+
+# Plot
+gg2 <- ggplot(df_inz) +
+  geom_line(aes(x = Meldedatum, y = Faelle7Tage_p100T, col = Impfquote_gesamt_boost), size = 1) +
+  scale_color_gradient(low = "red", high = "green", "Geboostert", breaks = seq(min(df_inz$Impfquote_gesamt_boost), max(df_inz$Impfquote_gesamt_boost), length.out = 3), labels = function(x) { paste0(x, "%") }) +
+  scale_x_date(breaks = "1 month", date_labels = "%d.%m") +
+  facet_grid(rows = vars(Bundesland)) +
+  ylab("7-Tage-Inzidenz") +
+  xlab("Datum") +
+  ggtitle("7-Tage-Inzidenz nach Bundesland", subtitle = paste0("Stand: ",format(lubridate::now(), "%d.%m.%Y"), ", Impfquoten vom 31.12.2021, Daten: RKI")) +
+  theme(text = element_text(size = 11),
+        strip.text.y = element_text(angle = 0))
+ggsave(filename = "impfquote_boost_inzidenz.pdf", width = unit(6, "in"), height = unit(14, "in"), device = "pdf")
 
 
 
@@ -84,7 +102,7 @@ hosp <- fread("https://raw.githubusercontent.com/robert-koch-institut/COVID-19-H
 df_hosp <- hosp %>%
   filter(Bundesland != "Bundesgebiet", 
          Altersgruppe %in% c("15-34", "35-59", "60-79", "80+"), 
-         Datum >= lubridate::ymd("20210916")) %>%
+         Datum >= lubridate::ymd("20211001")) %>%
   merge(x = ., y = quoten, by = "Bundesland") %>%
   mutate(Bundesland = abbreviate_bl(Bundesland))
 
@@ -93,17 +111,35 @@ df_hosp$Bundesland <- as.factor(df_hosp$Bundesland)
 df_hosp$Bundesland <- reorder(df_hosp$Bundesland, -df_hosp$Impfquote_gesamt_voll)
 
 # Plot
-gg2 <- ggplot(df_hosp) +
+gg3 <- ggplot(df_hosp) +
   geom_line(aes(x = Datum, y = `7T_Hospitalisierung_Inzidenz`, col = Impfquote_gesamt_voll), size = 1) +
   scale_color_gradient(low = "red", high = "green", "Vollst. Geimpfte", breaks = seq(min(df_hosp$Impfquote_gesamt_voll), max(df_hosp$Impfquote_gesamt_voll), length.out = 3), labels = function(x) { paste0(x, "%") }) +
   scale_x_date(breaks = "1 month", date_labels = "%d.%m") +
   facet_grid(rows = vars(Bundesland), cols = vars(Altersgruppe)) +
   ylab("7-Tage-Hospitalisierungsinzidenz") +
   xlab("Datum") +
-  ggtitle("7-Tage-Hospitalisierungsinzidenz nach Bundesland und Altersgruppe", subtitle = paste0("Stand: ", format(lubridate::now(), "%d.%m.%Y"), ", Impfquoten vom 16.09.2021, Daten: RKI")) +
+  ggtitle("7-Tage-Hospitalisierungsinzidenz nach Bundesland und Altersgruppe", subtitle = paste0("Stand: ", format(lubridate::now(), "%d.%m.%Y"), ", Impfquoten vom 31.12.2021, Daten: RKI")) +
   theme(text = element_text(size = 11),
         strip.text.y = element_text(angle = 0))
-ggsave(filename = "impfquote_hospitalisierung.pdf", width = unit(10, "in"), height = unit(14, "in"), device = "pdf",)
+ggsave(filename = "impfquote_voll_hospitalisierung.pdf", width = unit(10, "in"), height = unit(14, "in"), device = "pdf")
+
+
+# Bundesland zu Faktor konvertieren und für Plot sortieren
+df_hosp$Bundesland <- as.factor(df_hosp$Bundesland)
+df_hosp$Bundesland <- reorder(df_hosp$Bundesland, -df_hosp$Impfquote_gesamt_boost)
+
+# Plot
+gg4 <- ggplot(df_hosp) +
+  geom_line(aes(x = Datum, y = `7T_Hospitalisierung_Inzidenz`, col = Impfquote_gesamt_boost), size = 1) +
+  scale_color_gradient(low = "red", high = "green", "Vollst. Geimpfte", breaks = seq(min(df_hosp$Impfquote_gesamt_boost), max(df_hosp$Impfquote_gesamt_boost), length.out = 3), labels = function(x) { paste0(x, "%") }) +
+  scale_x_date(breaks = "1 month", date_labels = "%d.%m") +
+  facet_grid(rows = vars(Bundesland), cols = vars(Altersgruppe)) +
+  ylab("7-Tage-Hospitalisierungsinzidenz") +
+  xlab("Datum") +
+  ggtitle("7-Tage-Hospitalisierungsinzidenz nach Bundesland und Altersgruppe", subtitle = paste0("Stand: ", format(lubridate::now(), "%d.%m.%Y"), ", Impfquoten vom 31.12.2021, Daten: RKI")) +
+  theme(text = element_text(size = 11),
+        strip.text.y = element_text(angle = 0))
+ggsave(filename = "impfquote_boost_hospitalisierung.pdf", width = unit(10, "in"), height = unit(14, "in"), device = "pdf")
 
 
 
