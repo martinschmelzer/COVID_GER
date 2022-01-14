@@ -37,7 +37,7 @@ jobs:
         
       - name: Run script
         run: | 
-          source("impfquote_hospitalisierung.R")
+          source("create_plots.R")
         shell: Rscript {0}
         
       - name: Commit files
